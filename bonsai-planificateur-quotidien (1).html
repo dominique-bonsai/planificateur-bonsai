@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BONSAÏ — Planificateur Quotidien</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vert: #2d5a3d;
+    --vert-clair: #4a7c5e;
+    --vert-pale: #e8f0eb;
+    --or: #b5973a;
+    --or-clair: #f0e8cc;
+    --beige: #f7f4ef;
+    --brun: #3a2e22;
+    --gris: #8a8a8a;
+    --blanc: #ffffff;
+    --ombre: 0 2px 20px rgba(45,90,61,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--beige);
+    min-height: 100vh;
+    padding: 32px 16px 60px;
+    color: var(--brun);
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    animation: fadeIn 0.7s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--vert);
+    letter-spacing: 0.12em;
+  }
+
+  .logo span {
+    color: var(--or);
+  }
+
+  .date-affichage {
+    font-size: 13px;
+    color: var(--gris);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* CARTE */
+  .carte {
+    background: var(--blanc);
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: var(--ombre);
+    margin-bottom: 18px;
+    border-left: 4px solid var(--vert);
+    transition: box-shadow 0.2s;
+  }
+
+  .carte:hover {
+    box-shadow: 0 4px 30px rgba(45,90,61,0.15);
+  }
+
+  .carte-titre {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--vert);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .carte-titre .icone {
+    width: 22px;
+    height: 22px;
+    background: var(--vert-pale);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  /* INTENTION */
+  .carte-intention {
+    border-left-color: var(--or);
+  }
+
+  .carte-intention .carte-titre {
+    color: var(--or);
+  }
+
+  .carte-intention .icone {
+    background: var(--or-clair);
+  }
+
+  textarea, input[type="text"] {
+    width: 100%;
+    border: 1px solid #e0ddd8;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--brun);
+    background: var(--beige);
+    outline: none;
+    resize: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  textarea:focus, input[type="text"]:focus {
+    border-color: var(--vert-clair);
+    background: #f0f5f2;
+  }
+
+  /* ÉNERGIE */
+  .energie-wrapper {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .energie-btn {
+    border: 1.5px solid #ddd;
+    background: var(--beige);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--brun);
+  }
+
+  .energie-btn:hover {
+    border-color: var(--vert-clair);
+    background: var(--vert-pale);
+  }
+
+  .energie-btn.actif {
+    background: var(--vert);
+    border-color: var(--vert);
+    color: white;
+    font-weight: 500;
+  }
+
+  /* VICTOIRES */
+  .victoire-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #e8e4de;
+    position: relative;
+  }
+
+  .victoire-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .victoire-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--vert-pale);
+    position: absolute;
+    left: -36px;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+  }
+
+  .victoire-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .select-cat {
+    border: 1px solid #e0ddd8;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--beige);
+    color: var(--brun);
+    cursor: pointer;
+    outline: none;
+    min-width: 100px;
+  }
+
+  .input-temps {
+    border: 1px solid #e0ddd8;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--beige);
+    color: var(--brun);
+    width: 90px;
+    text-align: center;
+  }
+
+  .checkbox-done {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--vert);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .victoire-row {
+    display: grid;
+    grid-template-columns: 1fr 110px 90px 26px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #e8e4de;
+  }
+
+  .victoire-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .label-col {
+    font-size: 11px;
+    color: var(--gris);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .cols-header {
+    display: grid;
+    grid-template-columns: 1fr 110px 90px 26px;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--vert-pale);
+  }
+
+  /* CLIENTS */
+  .client-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .client-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .badge-statut {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    outline: none;
+    background: var(--beige);
+    color: var(--brun);
+    border: 1px solid #ddd;
+  }
+
+  .checkbox-done-sm {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--or);
+    cursor: pointer;
+  }
+
+  /* BOUTON RESET / SAVE */
+  .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-reset {
+    background: transparent;
+    border: 1.5px solid #ddd;
+    color: var(--gris);
+  }
+
+  .btn-reset:hover {
+    border-color: var(--brun);
+    color: var(--brun);
+  }
+
+  .btn-save {
+    background: var(--vert);
+    color: white;
+  }
+
+  .btn-save:hover {
+    background: var(--vert-clair);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(45,90,61,0.25);
+  }
+
+  /* VICTOIRE COMPLÉTÉE */
+  .done-text {
+    text-decoration: line-through;
+    opacity: 0.45;
+  }
+
+  /* BARRE PROGRESSION */
+  .progression-wrap {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .barre {
+    flex: 1;
+    height: 6px;
+    background: var(--vert-pale);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .barre-fill {
+    height: 100%;
+    background: var(--vert);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .progression-label {
+    font-size: 12px;
+    color: var(--gris);
+    white-space: nowrap;
+  }
+
+  /* NOTE */
+  .note {
+    font-size: 11.5px;
+    color: var(--gris);
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  /* CONGRUENCE */
+  .carte-congruence {
+    border-left-color: #7b5ea7;
+    background: linear-gradient(135deg, #fff 80%, #f5f0fa);
+  }
+  .carte-congruence .carte-titre { color: #7b5ea7; }
+  .carte-congruence .icone { background: #f0eaf8; }
+  .congruence-question { margin-bottom: 16px; }
+  .q-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #7b5ea7;
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
+  }
+
+  /* WELLNESS */
+  .carte-wellness {
+    border-left-color: #3a8a6e;
+    background: linear-gradient(135deg, #fff 75%, #edf7f3);
+  }
+  .carte-wellness .carte-titre { color: #2d6e55; }
+  .carte-wellness .icone { background: #d6f0e6; }
+
+  /* IMMEUBLE */
+  .carte-immeuble {
+    border-left-color: #7a6a4a;
+    background: linear-gradient(135deg, #fff 75%, #f7f3ec);
+  }
+  .carte-immeuble .carte-titre { color: #5a4e32; }
+  .carte-immeuble .icone { background: #f0ead8; }
+
+  /* BOUTONS AJOUTER SECONDAIRES */
+  .btn-add-sec {
+    border: 1.5px dashed;
+    background: transparent;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-add-wellness { border-color: #3a8a6e; color: #3a8a6e; }
+  .btn-add-wellness:hover { background: #edf7f3; }
+  .btn-add-compassion { border-color: #c0607a; color: #c0607a; }
+  .btn-add-compassion:hover { background: #fdf0f3; }
+  .btn-add-immeuble { border-color: #7a6a4a; color: #7a6a4a; }
+  .btn-add-immeuble:hover { background: #f7f3ec; }
+
+  /* TAG TYPE */
+  .tag-type {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+  .tag-wellness { background: #d6f0e6; color: #2d6e55; }
+  .tag-compassion { background: #fde8ee; color: #c0607a; }
+  .tag-immeuble { background: #f0ead8; color: #5a4e32; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--vert);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 520px) {
+    .carte { padding: 20px 18px; }
+    .cols-header, .victoire-row { grid-template-columns: 1fr 90px 70px 24px; }
+    .header { flex-direction: column; align-items: flex-start; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">BON<span>SAÏ</span></div>
+    <div class="date-affichage" id="dateAff"></div>
+  </div>
+
+  <!-- CONGRUENCE IDENTITAIRE -->
+  <div class="carte carte-congruence">
+    <div class="carte-titre"><div class="icone">🧠</div> Congruence identitaire — Dr James</div>
+    <p class="note" style="margin-bottom:18px;">Avant de regarder ton téléphone. Laisse ton cerveau s'aligner d'abord.</p>
+
+    <div class="congruence-question">
+      <div class="q-label">① Qui suis-je en train de devenir ?</div>
+      <textarea id="q1" rows="2" placeholder="Visualise la meilleure version de toi-même… la plus aimante, la plus paisible, dont tu es fier."></textarea>
+    </div>
+
+    <div class="congruence-question">
+      <div class="q-label">② Que ferait cette version de moi aujourd'hui ?</div>
+      <textarea id="q2" rows="2" placeholder="Imagine-toi en action : ton rituel matinal, ta journée avec le cœur ouvert…"></textarea>
+    </div>
+
+    <div class="congruence-question" style="margin-bottom:0;">
+      <div class="q-label">③ Quelle est <em>l'une seule action</em> qui prouve que cette identité est vraie ?</div>
+      <textarea id="q3" rows="2" placeholder="L'action précise qui ferme la boucle de ton intention aujourd'hui…"></textarea>
+    </div>
+  </div>
+
+  <!-- INTENTION --><br>
+  <div class="carte carte-intention">
+    <div class="carte-titre"><div class="icone">✦</div> Mon intention du jour</div>
+    <textarea id="intention" rows="2" placeholder="Une phrase qui guide ta journée…"></textarea>
+  </div>
+
+  <!-- ÉNERGIE -->
+  <div class="carte">
+    <div class="carte-titre"><div class="icone">⚡</div> Niveau d'énergie</div>
+    <div class="energie-wrapper">
+      <button class="energie-btn" onclick="selectEnergie(this, '🔴 Vide')">🔴 Vide</button>
+      <button class="energie-btn" onclick="selectEnergie(this, '🟠 Moyen')">🟠 Moyen</button>
+      <button class="energie-btn" onclick="selectEnergie(this, '🟡 Correct')">🟡 Correct</button>
+      <button class="energie-btn" onclick="selectEnergie(this, '🟢 En flow')">🟢 En flow</button>
+      <button class="energie-btn" onclick="selectEnergie(this, '⚡ Rechargé')">⚡ Rechargé</button>
+    </div>
+  </div>
+
+  <!-- CLIENTS À APPELER -->
+  <div class="carte">
+    <div class="carte-titre"><div class="icone">📞</div> Clients à appeler aujourd'hui</div>
+    <div id="clients-list"></div>
+    <button onclick="ajouterClient()" style="margin-top:14px; background:transparent; border:1.5px dashed var(--vert-clair); color:var(--vert-clair); border-radius:8px; padding:8px 16px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s;" onmouseover="this.style.background='var(--vert-pale)'" onmouseout="this.style.background='transparent'">+ Ajouter un client</button>
+  </div>
+
+  <!-- TÂCHES FINANCES -->
+  <div class="carte">
+    <div class="carte-titre"><div class="icone">💼</div> Tâches importantes — Services Financiers</div>
+    <div id="finances-list"></div>
+    <button onclick="ajouterFinance()" style="margin-top:14px; background:transparent; border:1.5px dashed var(--vert-clair); color:var(--vert-clair); border-radius:8px; padding:8px 16px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s;" onmouseover="this.style.background='var(--vert-pale)'" onmouseout="this.style.background='transparent'">+ Ajouter une tâche</button>
+  </div>
+
+  <!-- BONSAÏ WELLNESS -->
+  <div class="carte carte-wellness">
+    <div class="carte-titre"><div class="icone">🌿</div> BONSAÏ Wellness — Graine du jour</div>
+    <p class="note" style="margin-bottom:14px;">Une action, un message, une idée. La constance bat l'intensité.</p>
+    <div id="wellness-list"></div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button onclick="ajouterWellness()" class="btn-add-sec btn-add-wellness">+ Action Wellness</button>
+      <button onclick="ajouterCompassion()" class="btn-add-sec btn-add-compassion">💌 Message de compassion</button>
+    </div>
+  </div>
+
+  <!-- GESTION IMMEUBLES -->
+  <div class="carte carte-immeuble">
+    <div class="carte-titre"><div class="icone">🏢</div> Gestion d'immeubles</div>
+    <p class="note" style="margin-bottom:14px;">Une chose aujourd'hui suffit — suivi locataire, travaux, appel, document.</p>
+    <div id="immeuble-list"></div>
+    <div style="margin-top:14px;">
+      <button onclick="ajouterImmeuble()" class="btn-add-sec btn-add-immeuble">+ Ajouter une tâche</button>
+    </div>
+  </div>
+
+  <!-- MES VICTOIRES DU JOUR -->
+  <div class="carte">
+    <div class="carte-titre"><div class="icone">🏆</div> Mes victoires du jour</div>
+    <p class="note" style="margin-bottom:14px;">Tes 3 tâches qui font que ta journée est réussie, peu importe le reste.</p>
+
+    <div class="cols-header">
+      <span class="label-col">Tâche</span>
+      <span class="label-col">Catégorie</span>
+      <span class="label-col">Temps estimé</span>
+      <span class="label-col">✓</span>
+    </div>
+
+    <div id="victoires-list">
+      <!-- Généré par JS -->
+    </div>
+
+    <!-- Progression -->
+    <div class="progression-wrap" style="margin-top:16px;">
+      <div class="barre"><div class="barre-fill" id="barre-fill" style="width:0%"></div></div>
+      <span class="progression-label" id="progression-label">0 / 3 victoires</span>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn btn-reset" onclick="resetJournee()">Réinitialiser</button>
+    <button class="btn btn-save" onclick="sauvegarder()">✓ Sauvegarder ma journée</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Journée sauvegardée ✓</div>
+
+<script>
+  // DATE
+  const jours = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const now = new Date();
+  document.getElementById('dateAff').textContent = `${jours[now.getDay()]} ${now.getDate()} ${mois[now.getMonth()]} ${now.getFullYear()}`;
+
+  // ÉNERGIE
+  let energieSelectee = '';
+  function selectEnergie(btn, val) {
+    document.querySelectorAll('.energie-btn').forEach(b => b.classList.remove('actif'));
+    btn.classList.add('actif');
+    energieSelectee = val;
+  }
+
+  // VICTOIRES
+  const categories = ['Pro', 'Perso', 'Santé', 'Finance', 'BONSAÏ'];
+  const victoires = [{tache:'', cat:'Pro', temps:'', done:false}, {tache:'', cat:'Pro', temps:'', done:false}, {tache:'', cat:'Pro', temps:'', done:false}];
+
+  function renderVictoires() {
+    const list = document.getElementById('victoires-list');
+    list.innerHTML = '';
+    victoires.forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'victoire-row';
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = `Victoire ${i+1}…`;
+      inp.value = v.tache;
+      inp.className = v.done ? 'done-text' : '';
+      inp.oninput = e => { victoires[i].tache = e.target.value; };
+
+      const sel = document.createElement('select');
+      sel.className = 'select-cat';
+      categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        if (c === v.cat) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.onchange = e => { victoires[i].cat = e.target.value; };
+
+      const tps = document.createElement('input');
+      tps.type = 'text';
+      tps.className = 'input-temps';
+      tps.placeholder = 'ex: 30 min';
+      tps.value = v.temps;
+      tps.oninput = e => { victoires[i].temps = e.target.value; };
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'checkbox-done';
+      chk.checked = v.done;
+      chk.onchange = e => {
+        victoires[i].done = e.target.checked;
+        inp.className = victoires[i].done ? 'done-text' : '';
+        updateProgression();
+      };
+
+      row.appendChild(inp);
+      row.appendChild(sel);
+      row.appendChild(tps);
+      row.appendChild(chk);
+      list.appendChild(row);
+    });
+    updateProgression();
+  }
+
+  function updateProgression() {
+    const done = victoires.filter(v => v.done).length;
+    const pct = Math.round((done / 3) * 100);
+    document.getElementById('barre-fill').style.width = pct + '%';
+    document.getElementById('progression-label').textContent = `${done} / 3 victoires`;
+  }
+
+  renderVictoires();
+
+  // CLIENTS
+  let clients = [{nom:'', statut:'À appeler', done:false}];
+
+  function renderClients() {
+    const list = document.getElementById('clients-list');
+    list.innerHTML = '';
+    clients.forEach((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'client-row';
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'Nom du client…';
+      inp.value = c.nom;
+      inp.style.cssText = c.done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      inp.oninput = e => clients[i].nom = e.target.value;
+
+      const sel = document.createElement('select');
+      sel.className = 'badge-statut';
+      ['À appeler','Rappel','Suivi dossier','Urgent','Message laissé'].forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        if (s === c.statut) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.onchange = e => clients[i].statut = e.target.value;
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'checkbox-done-sm';
+      chk.checked = c.done;
+      chk.title = 'Appelé ✓';
+      chk.onchange = e => {
+        clients[i].done = e.target.checked;
+        inp.style.cssText = clients[i].done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      };
+
+      row.appendChild(inp);
+      row.appendChild(sel);
+      row.appendChild(chk);
+      list.appendChild(row);
+    });
+  }
+
+  function ajouterClient() {
+    clients.push({nom:'', statut:'À appeler', done:false});
+    renderClients();
+  }
+
+  renderClients();
+
+  // TÂCHES FINANCES
+  let finances = [{tache:'', done:false}, {tache:'', done:false}, {tache:'', done:false}];
+
+  function renderFinances() {
+    const list = document.getElementById('finances-list');
+    list.innerHTML = '';
+    finances.forEach((f, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:1fr 26px;gap:10px;align-items:center;margin-bottom:10px;';
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'Tâche financière importante…';
+      inp.value = f.tache;
+      inp.style.cssText = f.done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      inp.oninput = e => finances[i].tache = e.target.value;
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'checkbox-done';
+      chk.checked = f.done;
+      chk.onchange = e => {
+        finances[i].done = e.target.checked;
+        inp.style.cssText = finances[i].done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      };
+
+      row.appendChild(inp);
+      row.appendChild(chk);
+      list.appendChild(row);
+    });
+  }
+
+  function ajouterFinance() {
+    finances.push({tache:'', done:false});
+    renderFinances();
+  }
+
+  renderFinances();
+
+  // WELLNESS
+  let wellnessTaches = [];
+
+  function renderWellness() {
+    const list = document.getElementById('wellness-list');
+    list.innerHTML = '';
+    if (wellnessTaches.length === 0) {
+      list.innerHTML = '<p style="font-size:13px;color:var(--gris);font-style:italic;">Aucune action ajoutée. Une seule suffit aujourd\'hui. 🌿</p>';
+      return;
+    }
+    wellnessTaches.forEach((w, i) => {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed #dceee6;';
+      if (i === wellnessTaches.length - 1) wrap.style.borderBottom = 'none';
+
+      const tag = document.createElement('span');
+      tag.className = 'tag-type ' + (w.type === 'compassion' ? 'tag-compassion' : 'tag-wellness');
+      tag.textContent = w.type === 'compassion' ? '💌 Message de compassion' : '🌿 Action Wellness';
+      wrap.appendChild(tag);
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:1fr 26px;gap:10px;align-items:center;';
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = w.type === 'compassion' ? 'À qui envoyer de l\'amour aujourd\'hui ? Comment ?' : 'Tâche, idée ou action Wellness…';
+      inp.value = w.tache;
+      inp.style.cssText = w.done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      inp.oninput = e => wellnessTaches[i].tache = e.target.value;
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'checkbox-done';
+      chk.checked = w.done;
+      chk.style.accentColor = w.type === 'compassion' ? '#c0607a' : '#3a8a6e';
+      chk.onchange = e => {
+        wellnessTaches[i].done = e.target.checked;
+        inp.style.cssText = wellnessTaches[i].done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      };
+
+      row.appendChild(inp);
+      row.appendChild(chk);
+      wrap.appendChild(row);
+      list.appendChild(wrap);
+    });
+  }
+
+  function ajouterWellness() {
+    wellnessTaches.push({tache:'', type:'wellness', done:false});
+    renderWellness();
+  }
+
+  function ajouterCompassion() {
+    wellnessTaches.push({tache:'', type:'compassion', done:false});
+    renderWellness();
+  }
+
+  renderWellness();
+
+  // IMMEUBLES
+  let immeubles = [];
+
+  function renderImmeubles() {
+    const list = document.getElementById('immeuble-list');
+    list.innerHTML = '';
+    if (immeubles.length === 0) {
+      list.innerHTML = '<p style="font-size:13px;color:var(--gris);font-style:italic;">Rien pour aujourd\'hui — ou ajoute un suivi rapide. 🏢</p>';
+      return;
+    }
+    immeubles.forEach((t, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:1fr 120px 26px;gap:10px;align-items:center;margin-bottom:10px;';
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'Ex: Appeler locataire apt. 3, vérifier toiture…';
+      inp.value = t.tache;
+      inp.style.cssText = t.done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      inp.oninput = e => immeubles[i].tache = e.target.value;
+
+      const sel = document.createElement('select');
+      sel.className = 'badge-statut';
+      ['Suivi locataire','Travaux','Appel/courriel','Document','Finance immeuble','Autre'].forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        if (s === t.type) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.onchange = e => immeubles[i].type = e.target.value;
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'checkbox-done';
+      chk.style.accentColor = '#7a6a4a';
+      chk.checked = t.done;
+      chk.onchange = e => {
+        immeubles[i].done = e.target.checked;
+        inp.style.cssText = immeubles[i].done ? 'text-decoration:line-through;opacity:0.45;' : '';
+      };
+
+      row.appendChild(inp);
+      row.appendChild(sel);
+      row.appendChild(chk);
+      list.appendChild(row);
+    });
+  }
+
+  function ajouterImmeuble() {
+    immeubles.push({tache:'', type:'Suivi locataire', done:false});
+    renderImmeubles();
+  }
+
+  renderImmeubles();
+
+  // SAUVEGARDE LOCALE
+  const STORAGE_KEY = 'bonsai-planificateur';
+
+  function getCleJour() {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+
+  function sauvegarder() {
+    const data = {
+      date: getCleJour(),
+      intention: document.getElementById('intention').value,
+      q1: document.getElementById('q1').value,
+      q2: document.getElementById('q2').value,
+      q3: document.getElementById('q3').value,
+      energie: energieSelectee,
+      victoires,
+      clients,
+      finances,
+      wellnessTaches,
+      immeubles
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const toast = document.getElementById('toast');
+    toast.textContent = '✓ Journée sauvegardée localement';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+
+  function chargerDonnees() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+
+      // Charger seulement si c'est aujourd'hui
+      if (data.date !== getCleJour()) {
+        // Journée différente — on propose de garder ou reset
+        const garder = confirm(`📅 Des données du ${data.date} ont été trouvées.\n\nVeux-tu les charger quand même ?\n\n(Annuler = nouvelle journée vide)`);
+        if (!garder) return;
+      }
+
+      document.getElementById('intention').value = data.intention || '';
+      document.getElementById('q1').value = data.q1 || '';
+      document.getElementById('q2').value = data.q2 || '';
+      document.getElementById('q3').value = data.q3 || '';
+
+      if (data.energie) {
+        document.querySelectorAll('.energie-btn').forEach(b => {
+          if (b.textContent.trim() === data.energie) {
+            b.classList.add('actif');
+            energieSelectee = data.energie;
+          }
+        });
+      }
+
+      if (data.victoires) { data.victoires.forEach((v,i) => { if(victoires[i]) Object.assign(victoires[i], v); }); }
+      if (data.clients) clients = data.clients;
+      if (data.finances) { data.finances.forEach((f,i) => { if(finances[i]) Object.assign(finances[i], f); }); }
+      if (data.wellnessTaches) wellnessTaches = data.wellnessTaches;
+      if (data.immeubles) immeubles = data.immeubles;
+
+      renderVictoires();
+      renderClients();
+      renderFinances();
+      renderWellness();
+      renderImmeubles();
+
+      const toast = document.getElementById('toast');
+      toast.textContent = '📂 Journée chargée';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    } catch(e) {
+      console.log('Aucune donnée à charger.');
+    }
+  }
+
+  // Charger au démarrage
+  chargerDonnees();
+
+  // Auto-sauvegarde toutes les 30 secondes
+  setInterval(sauvegarder, 30000);
+
+  function resetJournee() {
+    if (!confirm('Réinitialiser la journée ? Les données sauvegardées seront effacées.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    document.getElementById('intention').value = '';
+    document.getElementById('q1').value = '';
+    document.getElementById('q2').value = '';
+    document.getElementById('q3').value = '';
+    document.querySelectorAll('.energie-btn').forEach(b => b.classList.remove('actif'));
+    energieSelectee = '';
+    victoires.forEach(v => { v.tache=''; v.cat='Pro'; v.temps=''; v.done=false; });
+    clients = [{nom:'', statut:'À appeler', done:false}];
+    finances = [{tache:'', done:false}, {tache:'', done:false}, {tache:'', done:false}];
+    renderVictoires();
+    renderClients();
+    renderFinances();
+    wellnessTaches = [];
+    immeubles = [];
+    renderWellness();
+    renderImmeubles();
+  }
+</script>
+</body>
+</html>
